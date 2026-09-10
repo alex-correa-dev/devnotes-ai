@@ -1,0 +1,36 @@
+query ListNotes {
+  notes {
+    id
+    title
+    content
+    tags
+    createdAt
+    updatedAt
+  }
+}
+
+query GetNote($id: ID!) {
+  note(id: $id) {
+    id
+    title
+    content
+    tags
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateNote($input: CreateNoteInput!) {
+  createNote(input: $input) {
+    id
+    title
+    content
+    tags
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteNote($id: ID!) {
+  deleteNote(id: $id)
+}

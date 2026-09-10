@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@source "../app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #111;
+  background: #fafafa;
+}

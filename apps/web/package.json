@@ -3,9 +3,29 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"[web] dev placeholder — Fase 3\"",
-    "build": "echo \"[web] build placeholder\"",
+    "dev": "dotenv -e ../../.env -- next dev --webpack -p 3000",
+    "build": "next build",
     "lint": "echo \"[web] lint placeholder\"",
-    "typecheck": "echo \"[web] typecheck placeholder\""
+    "typecheck": "echo \"[web] typecheck placeholder\"",
+    "codegen": "graphql-codegen --config codegen.ts"
+  },
+  "dependencies": {
+    "@apollo/client": "^4.2.12",
+    "@apollo/client-integration-nextjs": "^0.14.5",
+    "graphql": "^17.0.2",
+    "next": "^16.3.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^7.4.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "dotenv-cli": "^11.0.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
   }
 }
