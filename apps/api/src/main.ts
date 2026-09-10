@@ -66,6 +66,10 @@ const start = async (): Promise<void> => {
     expressMiddleware(server, { context: async () => ({ useCases }) }),
   );
 
+  app.get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   await new Promise<void>((resolve) => httpServer.listen({ port: env.port }, resolve));
 
   console.log(`🚀 GraphQL ready at http://localhost:${env.port}/graphql`);

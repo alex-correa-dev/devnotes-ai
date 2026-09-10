@@ -1,0 +1,46 @@
+# Dependencies — reinstaladas no container
+node_modules
+**/node_modules
+.pnpm-store
+
+# Build artifacts — gerados no container
+dist
+**/dist
+.next
+**/.next
+out
+.turbo
+
+# Environment — NUNCA copiar para a imagem
+.env
+.env.*
+!.env.example
+
+# Secrets
+*.pem
+*.key
+secrets/
+kubeconfig
+
+# Version control
+.git
+.gitignore
+.github
+
+# IDE e OS
+.vscode
+.idea
+.DS_Store
+
+# Docs e testes
+*.md
+!README.md
+coverage
+**/__tests__
+**/*.test.ts
+**/*.spec.ts
+
+# Infra — não precisa dentro da imagem
+infra/
+docker-compose*.yml
+Dockerfile*
