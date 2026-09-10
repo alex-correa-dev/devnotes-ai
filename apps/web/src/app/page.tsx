@@ -1,31 +1,38 @@
-import Link from 'next/link';
-import { query } from '@/lib/apollo/client';
-import { ListNotesDocument } from '@/lib/graphql/generated/graphql';
+'use client';
+
+import { useState } from 'react';
+import { useQuery } from '@apollo/client/react';
+import {
+  ListNotesDocument,
+  type SearchNotesQuery,
+} from '@/lib/graphql/generated/graphql';
+import { SearchBar } from '@/components/search-bar';
 import { NoteList } from '@/components/note-list';
 
-export default async function HomePage() {
-  const { data } = await query({
-    query: ListNotesDocument,
-  });
+export default function HomePage() {
+  const { data: initialData } = useQuery(ListNotesDocument);
+
+  const [searchResult, setSearchResult] = useState<
+    SearchNotesQuery['searchNotes'] | null
+  >(null);
+
+  const notes = searchResult?.notes ?? initialData?.notes ?? [];
 
   return (
     <main className="mx-auto max-w-3xl p-8">
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">DevNotes AI</h1>
-          <p className="text-sm text-gray-600">
-            Base de conhecimento com busca full-text
-          </p>
-        </div>
-        <Link
-          href="/notes/new"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Nova nota
-        </Link>
-      </header>
+      <h1 className="mb-6 text-3xl font-bold">DevNotes AI</h1>
 
-      <NoteList notes={data.notes} />
+      <SearchBar onResults={setSearchResult} />
+
+      {searchResult && (
+        <p className="mt-4 text-sm text-gray-600">
+          {searchResult.total} resultado(s) encontrado(s)
+        </p>
+      )}
+
+      <div className="mt-6">
+        <NoteList notes={notes} />
+      </div>
     </main>
   );
 }

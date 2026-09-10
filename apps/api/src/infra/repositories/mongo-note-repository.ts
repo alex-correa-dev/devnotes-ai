@@ -1,6 +1,12 @@
 import { Note } from '../../domain/entities/note.js';
-import type { NoteRepository } from '../../domain/repositories/note-repository.js';
+import type {
+  NoteRepository,
+  SearchNotesParams,
+  SearchNotesResult,
+} from '../../domain/repositories/note-repository.js';
 import { NoteModel } from '../database/mongoose/models/note-model.js';
+
+const SEARCH_INDEX_NAME = 'notes_search';
 
 export class MongoNoteRepository implements NoteRepository {
   async findAll(): Promise<Note[]> {
@@ -35,6 +41,77 @@ export class MongoNoteRepository implements NoteRepository {
     const result = await NoteModel.findByIdAndDelete(id);
 
     return result !== null;
+  }
+
+  async search(params: SearchNotesParams): Promise<SearchNotesResult> {
+    const { query, tags, limit = 20, skip = 0 } = params;
+
+    const mustClauses = [
+      {
+        text: {
+          query,
+          path: ['title', 'content'],
+          fuzzy: { maxEdits: 1, prefixLength: 2 },
+          score: { boost: { path: 'title', undefined: 3 } },
+        },
+      },
+    ];
+
+    const filterClauses = tags?.length
+      ? [{ text: { query: tags, path: 'tags' } }]
+      : [];
+
+    const pipeline = [
+      {
+        $search: {
+          index: SEARCH_INDEX_NAME,
+          compound: {
+            must: mustClauses,
+            filter: filterClauses,
+          },
+          count: { type: 'total' },
+        },
+      },
+      { $addFields: { score: { $meta: 'searchScore' } } },
+      { $skip: skip },
+      { $limit: limit },
+    ];
+
+    const results = await NoteModel.aggregate(pipeline);
+
+    const total = results[0]?.__count ?? results.length;
+
+    return {
+      notes: results.map((doc) => this.toDomain(doc)),
+      total,
+    };
+  }
+
+  async autocomplete(prefix: string, limit = 5): Promise<string[]> {
+    const pipeline = [
+      {
+        $search: {
+          index: SEARCH_INDEX_NAME,
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query: prefix,
+                  path: 'title',
+                  tokenOrder: 'sequential',
+                },
+              },
+            ],
+            minimumShouldMatch: 1,
+          },
+        },
+      },
+      { $limit: limit },
+      { $project: { _id: 0, title: 1 } },
+    ];
+
+    const results = await NoteModel.aggregate(pipeline);
+    return results.map((doc) => doc.title);
   }
 
   private toDomain(doc: {

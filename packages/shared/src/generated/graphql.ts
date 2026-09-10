@@ -57,15 +57,41 @@ export type Note = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type NoteSearchResult = {
+  __typename?: 'NoteSearchResult';
+  notes: Array<Note>;
+  total: Scalars['Int']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  autocompleteNotes: Array<Scalars['String']['output']>;
   note?: Maybe<Note>;
   notes: Array<Note>;
+  searchNotes: NoteSearchResult;
+};
+
+
+export type QueryAutocompleteNotesArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  prefix: Scalars['String']['input'];
 };
 
 
 export type QueryNoteArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QuerySearchNotesArgs = {
+  input: SearchNotesInput;
+};
+
+export type SearchNotesInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type UpdateNoteInput = {
@@ -150,9 +176,12 @@ export type ResolversTypes = ResolversObject<{
   CreateNoteInput: CreateNoteInput;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<Note>;
+  NoteSearchResult: ResolverTypeWrapper<NoteSearchResult>;
   Query: ResolverTypeWrapper<{}>;
+  SearchNotesInput: SearchNotesInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   UpdateNoteInput: UpdateNoteInput;
 }>;
@@ -163,9 +192,12 @@ export type ResolversParentTypes = ResolversObject<{
   CreateNoteInput: CreateNoteInput;
   DateTime: Scalars['DateTime']['output'];
   ID: Scalars['ID']['output'];
+  Int: Scalars['Int']['output'];
   Mutation: {};
   Note: Note;
+  NoteSearchResult: NoteSearchResult;
   Query: {};
+  SearchNotesInput: SearchNotesInput;
   String: Scalars['String']['output'];
   UpdateNoteInput: UpdateNoteInput;
 }>;
@@ -190,15 +222,24 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type NoteSearchResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NoteSearchResult'] = ResolversParentTypes['NoteSearchResult']> = ResolversObject<{
+  notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  total?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  autocompleteNotes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QueryAutocompleteNotesArgs, 'prefix'>>;
   note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, 'id'>>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
+  searchNotes?: Resolver<ResolversTypes['NoteSearchResult'], ParentType, ContextType, RequireFields<QuerySearchNotesArgs, 'input'>>;
 }>;
 
 export type Resolvers<ContextType = GraphQLContext> = ResolversObject<{
   DateTime?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   Note?: NoteResolvers<ContextType>;
+  NoteSearchResult?: NoteSearchResultResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 }>;
 

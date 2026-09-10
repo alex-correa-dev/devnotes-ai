@@ -16,14 +16,19 @@ import {
   GetNoteUseCase,
   UpdateNoteUseCase,
   DeleteNoteUseCase,
+  SearchNotesUseCase,
+  AutocompleteNotesUseCase,
 } from './application/use-cases/index.js';
 import { noteResolvers } from './presentation/graphql/resolvers/note-resolver.js';
 import type { GraphQLContext } from './presentation/graphql/context.js';
+import { ensureSearchIndex } from './infra/database/mongoose/search-index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const start = async (): Promise<void> => {
   await connectToMongo(env.mongoUri);
+
+  await ensureSearchIndex();
 
   // --- Composition root ---
   const noteRepository = new MongoNoteRepository();
@@ -33,6 +38,8 @@ const start = async (): Promise<void> => {
     getNote: new GetNoteUseCase(noteRepository),
     updateNote: new UpdateNoteUseCase(noteRepository),
     deleteNote: new DeleteNoteUseCase(noteRepository),
+    searchNotes: new SearchNotesUseCase(noteRepository),
+    autocompleteNotes: new AutocompleteNotesUseCase(noteRepository),
   };
 
   const typeDefs = readFileSync(
@@ -58,11 +65,13 @@ const start = async (): Promise<void> => {
   );
 
   await new Promise<void>((resolve) => httpServer.listen({ port: env.port }, resolve));
+
   console.log(`🚀 GraphQL ready at http://localhost:${env.port}/graphql`);
 
   const shutdown = async (): Promise<void> => {
     await server.stop();
     await disconnectFromMongo();
+
     process.exit(0);
   };
 
@@ -72,5 +81,6 @@ const start = async (): Promise<void> => {
 
 start().catch((error) => {
   console.error('Failed to start server:', error);
+
   process.exit(1);
 });

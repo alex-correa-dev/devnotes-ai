@@ -9,6 +9,11 @@ type Note {
   updatedAt: DateTime!
 }
 
+type NoteSearchResult {
+  notes: [Note!]!
+  total: Int!
+}
+
 input CreateNoteInput {
   title: String!
   content: String!
@@ -21,9 +26,18 @@ input UpdateNoteInput {
   tags: [String!]
 }
 
+input SearchNotesInput {
+  query: String!
+  tags: [String!]
+  limit: Int
+  skip: Int
+}
+
 type Query {
   notes: [Note!]!
   note(id: ID!): Note
+  searchNotes(input: SearchNotesInput!): NoteSearchResult!
+  autocompleteNotes(prefix: String!, limit: Int): [String!]!
 }
 
 type Mutation {

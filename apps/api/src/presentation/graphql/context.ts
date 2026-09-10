@@ -4,6 +4,8 @@ import type {
   GetNoteUseCase,
   UpdateNoteUseCase,
   DeleteNoteUseCase,
+  SearchNotesUseCase,
+  AutocompleteNotesUseCase,
 } from '../../../application/use-cases/index.js';
 
 export type GraphQLContext = {
@@ -13,5 +15,7 @@ export type GraphQLContext = {
     getNote: GetNoteUseCase;
     updateNote: UpdateNoteUseCase;
     deleteNote: DeleteNoteUseCase;
+    searchNotes: SearchNotesUseCase;
+    autocompleteNotes: AutocompleteNotesUseCase;
   };
 };
