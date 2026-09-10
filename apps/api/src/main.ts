@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { env } from './config/env.js';
-import { InMemoryNoteRepository } from './infra/repositories/in-memory-note-repository.js';
+import { connectToMongo, disconnectFromMongo } from './infra/database/mongoose/connection.js';
+import { MongoNoteRepository } from './infra/repositories/mongo-note-repository.js';
 import {
   CreateNoteUseCase,
   ListNotesUseCase,
@@ -21,24 +22,24 @@ import type { GraphQLContext } from './presentation/graphql/context.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// --- Composition root ---
-// Dependency injection happens here, at the boundary of the application.
-const noteRepository = new InMemoryNoteRepository();
-
-const useCases = {
-  createNote: new CreateNoteUseCase(noteRepository),
-  listNotes: new ListNotesUseCase(noteRepository),
-  getNote: new GetNoteUseCase(noteRepository),
-  updateNote: new UpdateNoteUseCase(noteRepository),
-  deleteNote: new DeleteNoteUseCase(noteRepository),
-};
-
-const typeDefs = readFileSync(
-  join(__dirname, '../../../packages/shared/src/graphql/schema.graphql'),
-  'utf-8',
-);
-
 const start = async (): Promise<void> => {
+  await connectToMongo(env.mongoUri);
+
+  // --- Composition root ---
+  const noteRepository = new MongoNoteRepository();
+  const useCases = {
+    createNote: new CreateNoteUseCase(noteRepository),
+    listNotes: new ListNotesUseCase(noteRepository),
+    getNote: new GetNoteUseCase(noteRepository),
+    updateNote: new UpdateNoteUseCase(noteRepository),
+    deleteNote: new DeleteNoteUseCase(noteRepository),
+  };
+
+  const typeDefs = readFileSync(
+    join(__dirname, '../../../packages/shared/src/graphql/schema.graphql'),
+    'utf-8',
+  );
+
   const app = express();
   const httpServer = http.createServer(app);
 
@@ -53,16 +54,20 @@ const start = async (): Promise<void> => {
   app.use(
     '/graphql',
     express.json(),
-    expressMiddleware(server, {
-      context: async () => ({ useCases }),
-    }),
+    expressMiddleware(server, { context: async () => ({ useCases }) }),
   );
 
-  await new Promise<void>((resolve) =>
-    httpServer.listen({ port: env.port }, resolve),
-  );
-
+  await new Promise<void>((resolve) => httpServer.listen({ port: env.port }, resolve));
   console.log(`🚀 GraphQL ready at http://localhost:${env.port}/graphql`);
+
+  const shutdown = async (): Promise<void> => {
+    await server.stop();
+    await disconnectFromMongo();
+    process.exit(0);
+  };
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 };
 
 start().catch((error) => {
