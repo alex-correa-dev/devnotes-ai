@@ -1,0 +1,12 @@
+{
+  "name": "@devnotes/api",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "echo \"[api] dev placeholder — Fase 1\"",
+    "build": "echo \"[api] build placeholder\"",
+    "lint": "echo \"[api] lint placeholder\"",
+    "typecheck": "echo \"[api] typecheck placeholder\""
+  }
+}
