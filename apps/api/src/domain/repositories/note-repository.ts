@@ -12,6 +12,28 @@ export type SearchNotesResult = {
   total: number;
 };
 
+export type FacetBucket = {
+  value: string;
+  count: number;
+};
+
+export type SearchFacets = {
+  tags: FacetBucket[];
+};
+
+export type SearchWithFacetsParams = {
+  query: string;
+  tags?: string[];
+  limit?: number;
+  skip?: number;
+};
+
+export type SearchWithFacetsResult = {
+  notes: Note[];
+  total: number;
+  facets: SearchFacets;
+};
+
 export interface NoteRepository {
   findAll(): Promise<Note[]>;
   findById(id: string): Promise<Note | null>;

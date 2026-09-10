@@ -29,6 +29,21 @@ export const noteResolvers: Resolvers<GraphQLContext> = {
       };
     },
 
+    searchNotesWithFacets: async (_parent, { input }, { useCases }) => {
+      const result = await useCases.searchNotesWithFacets.execute({
+        query: input.query,
+        tags: input.tags ?? undefined,
+        limit: input.limit ?? undefined,
+        skip: input.skip ?? undefined,
+      });
+
+      return {
+        notes: result.notes.map(toGraphQLNote),
+        total: result.total,
+        facets: result.facets,
+      };
+    },
+
     autocompleteNotes: async (_parent, { prefix, limit }, { useCases }) => {
       return useCases.autocompleteNotes.execute(prefix, limit ?? undefined);
     },

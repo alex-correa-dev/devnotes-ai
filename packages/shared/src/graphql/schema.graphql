@@ -33,10 +33,33 @@ input SearchNotesInput {
   skip: Int
 }
 
+type FacetBucket {
+  value: String!
+  count: Int!
+}
+
+type SearchFacets {
+  tags: [FacetBucket!]!
+}
+
+type NoteSearchWithFacetsResult {
+  notes: [Note!]!
+  total: Int!
+  facets: SearchFacets!
+}
+
+input SearchNotesWithFacetsInput {
+  query: String!
+  tags: [String!]
+  limit: Int
+  skip: Int
+}
+
 type Query {
   notes: [Note!]!
   note(id: ID!): Note
   searchNotes(input: SearchNotesInput!): NoteSearchResult!
+  searchNotesWithFacets(input: SearchNotesWithFacetsInput!): NoteSearchWithFacetsResult!
   autocompleteNotes(prefix: String!, limit: Int): [String!]!
 }
 

@@ -4,22 +4,16 @@ import { useState, useEffect } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
 import {
   AutocompleteNotesDocument,
-  SearchNotesDocument,
-  type SearchNotesQuery,
 } from '@/lib/graphql/generated/graphql';
 
 type SearchBarProps = {
-  onResults: (result: SearchNotesQuery['searchNotes']) => void;
+  onSearch: (query: string) => void;
 };
 
-export function SearchBar({ onResults }: SearchBarProps) {
+export function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-
-  const [runSearch, { loading }] = useLazyQuery(SearchNotesDocument, {
-    fetchPolicy: 'network-only',
-  });
 
   const [runAutocomplete] = useLazyQuery(AutocompleteNotesDocument, {
     fetchPolicy: 'network-only',
@@ -44,56 +38,58 @@ export function SearchBar({ onResults }: SearchBarProps) {
     return () => clearTimeout(timer);
   }, [query, runAutocomplete]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
+    onSearch(query);
+  };
 
-    const { data } = await runSearch({
-      variables: { input: { query, limit: 20 } },
-    });
-
-    if (data) {
-      onResults(data.searchNotes);
-    }
+  const handlePickSuggestion = (suggestion: string) => {
+    setQuery(suggestion);
+    setShowSuggestions(false);
+    onSearch(suggestion);
   };
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <input
-        type="search"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setShowSuggestions(true);
-        }}
-        placeholder="Buscar notas..."
-        className="w-full rounded border px-4 py-2"
-      />
+      <div className="flex gap-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+          placeholder="Buscar notas..."
+          className="flex-1 rounded border px-4 py-2"
+        />
+        <button
+          type="submit"
+          disabled={query.trim().length === 0}
+          className="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          Buscar
+        </button>
+      </div>
 
       {showSuggestions && suggestions.length > 0 && (
         <ul className="absolute z-10 mt-1 w-full rounded border bg-white shadow">
           {suggestions.map((suggestion) => (
-            <li
-              key={suggestion}
-              onClick={() => {
-                setQuery(suggestion);
-                setShowSuggestions(false);
-              }}
-              className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-            >
-              {suggestion}
+            <li key={suggestion}>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handlePickSuggestion(suggestion)}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+              >
+                {suggestion}
+              </button>
             </li>
           ))}
         </ul>
       )}
-
-      <button
-        type="submit"
-        disabled={loading || query.length === 0}
-        className="mt-2 w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-      >
-        {loading ? 'Buscando...' : 'Buscar'}
-      </button>
     </form>
   );
 }

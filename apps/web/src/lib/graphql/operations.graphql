@@ -34,6 +34,25 @@ query SearchNotes($input: SearchNotesInput!) {
   }
 }
 
+query SearchNotesWithFacets($input: SearchNotesWithFacetsInput!) {
+  searchNotesWithFacets(input: $input) {
+    total
+    facets {
+      tags {
+        value
+        count
+      }
+    }
+    notes {
+      id
+      title
+      content
+      tags
+      createdAt
+    }
+  }
+}
+
 query AutocompleteNotes($prefix: String!, $limit: Int) {
   autocompleteNotes(prefix: $prefix, limit: $limit)
 }

@@ -52,7 +52,7 @@ export class MongoNoteRepository implements NoteRepository {
           query,
           path: ['title', 'content'],
           fuzzy: { maxEdits: 1, prefixLength: 2 },
-          score: { boost: { path: 'title', undefined: 3 } },
+          score: { boost: { value: 3 } },
         },
       },
     ];
@@ -112,6 +112,84 @@ export class MongoNoteRepository implements NoteRepository {
 
     const results = await NoteModel.aggregate(pipeline);
     return results.map((doc) => doc.title);
+  }
+
+  async searchWithFacets(params: SearchWithFacetsParams): Promise<SearchWithFacetsResult> {
+    const { query, tags, limit = 20, skip = 0 } = params;
+
+    const mustClauses = [
+      {
+        text: {
+          query,
+          path: ['title', 'content'],
+          fuzzy: { maxEdits: 1, prefixLength: 2 },
+          score: { boost: { value: 3 } }
+        },
+      },
+    ];
+
+    const filterClauses = tags?.length
+      ? [{ text: { query: tags, path: 'tags' } }]
+      : [];
+
+    const searchPipeline = [
+      {
+        $search: {
+          index: SEARCH_INDEX_NAME,
+          compound: {
+            must: mustClauses,
+            filter: filterClauses,
+          },
+          count: { type: 'total' },
+        },
+      },
+      { $addFields: { score: { $meta: 'searchScore' } } },
+      { $sort: { score: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+    ];
+
+    const facetPipeline = [
+      {
+        $searchMeta: {
+          index: SEARCH_INDEX_NAME,
+          facet: {
+            operator: {
+              compound: {
+                must: mustClauses,
+                filter: filterClauses,
+              },
+            },
+            facets: {
+              tagsFacet: {
+                type: 'string',
+                path: 'tags',
+                numBuckets: 20,
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    const [docs, meta] = await Promise.all([
+      NoteModel.aggregate(searchPipeline),
+      NoteModel.aggregate(facetPipeline),
+    ]);
+
+    const total = docs[0]?.__count ?? docs.length;
+    const tagsFacet = meta[0]?.facet?.tagsFacet?.buckets ?? [];
+
+    return {
+      notes: docs.map((doc) => this.toDomain(doc)),
+      total,
+      facets: {
+        tags: tagsFacet.map((bucket: { _id: string; count: number }) => ({
+          value: bucket._id,
+          count: bucket.count,
+        })),
+      },
+    };
   }
 
   private toDomain(doc: {

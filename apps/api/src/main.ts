@@ -17,6 +17,7 @@ import {
   UpdateNoteUseCase,
   DeleteNoteUseCase,
   SearchNotesUseCase,
+  SearchNotesWithFacetsUseCase,
   AutocompleteNotesUseCase,
 } from './application/use-cases/index.js';
 import { noteResolvers } from './presentation/graphql/resolvers/note-resolver.js';
@@ -39,6 +40,7 @@ const start = async (): Promise<void> => {
     updateNote: new UpdateNoteUseCase(noteRepository),
     deleteNote: new DeleteNoteUseCase(noteRepository),
     searchNotes: new SearchNotesUseCase(noteRepository),
+    searchNotesWithFacets: new SearchNotesWithFacetsUseCase(noteRepository),
     autocompleteNotes: new AutocompleteNotesUseCase(noteRepository),
   };
 
