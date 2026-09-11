@@ -10,6 +10,28 @@ DevNotes AI é uma aplicação para salvar, organizar e buscar notas de estudo, 
 
 O projeto cobre o ciclo completo de uma aplicação full-stack moderna: modelagem de domínio, API GraphQL, frontend SSR, containerização, orquestração em Kubernetes e CI/CD com publicação automática de imagens.
 
+## 📸 Screenshots
+
+### Home com busca
+
+![Home com busca e facetas](docs/screenshots/home.png)
+
+### Resultados com facetas por tag
+
+![Busca com facetas](docs/screenshots/search.png)
+
+### Autocomplete
+
+![Autocomplete](docs/screenshots/autocomplete.png)
+
+### Criar nota
+
+![Formulário de criação](docs/screenshots/new-note.png)
+
+### API GraphQL
+
+![Apollo Sandbox](docs/screenshots/graphql.png)
+
 ## 🛠️ Stack
 
 | Camada | Tecnologia |
@@ -26,9 +48,92 @@ O projeto cobre o ciclo completo de uma aplicação full-stack moderna: modelage
 
 ## 🏗️ Arquitetura
 
+### Visão geral
+
+```mermaid
+flowchart TB
+    subgraph Client["🖥️ Cliente"]
+        Browser["Browser / React"]
+    end
+
+    subgraph K8s["☸️ Kubernetes (kind)"]
+        Ingress["Ingress nginx"]
+
+        subgraph WebPod["Web Pod (2x)"]
+            Next["Next.js 16<br/>App Router + SSR"]
+            ApolloClient["Apollo Client 4"]
+        end
+
+        subgraph ApiPod["API Pod (2x, HPA)"]
+            Express["Express"]
+            ApolloServer["Apollo Server 4"]
+            subgraph CleanArch["Clean Architecture"]
+                Presentation["presentation/<br/>resolvers"]
+                Application["application/<br/>use cases"]
+                Domain["domain/<br/>entities + ports"]
+                Infra["infra/<br/>adapters"]
+            end
+        end
+
+        subgraph MongoPod["MongoDB (StatefulSet)"]
+            Mongod["mongod<br/>replica set"]
+        end
+    end
+
+    Browser --> Ingress
+    Ingress -->|"web.devnotes.local"| Next
+    Ingress -->|"api.devnotes.local"| Express
+    Next --> ApolloClient
+    ApolloClient -->|"GraphQL over HTTP"| Express
+    Express --> ApolloServer
+    ApolloServer --> Presentation
+    Presentation --> Application
+    Application --> Domain
+    Infra -.->|"implements"| Domain
+    Infra -->|"Mongoose"| Mongod
+
+    classDef client fill:#e1f5ff,stroke:#0288d1
+    classDef k8s fill:#f3e5f5,stroke:#7b1fa2
+    classDef clean fill:#fff3e0,stroke:#ef6c00
+    classDef db fill:#e8f5e9,stroke:#388e3c
+
+    class Browser client
+    class Ingress,Next,ApolloClient,Express,ApolloServer k8s
+    class Presentation,Application,Domain,Infra clean
+    class Mongod db
+```
+
 ### Backend — Clean Architecture
 
-O backend segue Clean Architecture com camadas isoladas:
+O backend segue Clean Architecture com a regra de dependência apontando **para dentro**:
+
+```mermaid
+flowchart LR
+    subgraph Outer["Camadas externas"]
+        direction TB
+        P["🎨 presentation<br/><i>GraphQL resolvers</i>"]
+        I["🔌 infra<br/><i>Mongoose, conexão</i>"]
+    end
+
+    subgraph Middle["Camada de aplicação"]
+        A["⚙️ application<br/><i>Use cases</i>"]
+    end
+
+    subgraph Inner["Camada de domínio"]
+        D["💎 domain<br/><i>Entities, ports, errors</i>"]
+    end
+
+    P -->|"chama"| A
+    A -->|"usa"| D
+    I -.->|"implementa interfaces"| D
+
+    style D fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
+    style A fill:#fff8e1,stroke:#f9a825
+    style P fill:#e8eaf6,stroke:#3949ab
+    style I fill:#e8eaf6,stroke:#3949ab
+```
+
+**Estrutura:**
 
 ```
 apps/api/src/
@@ -45,7 +150,38 @@ apps/api/src/
     └── graphql/
 ```
 
-A dependência sempre aponta para dentro: `presentation` → `application` → `domain`. O `infra` implementa interfaces do `domain` sem que as camadas internas saibam da existência do MongoDB, Express ou Apollo.
+O `infra` implementa interfaces do `domain` sem que as camadas internas saibam da existência do MongoDB, Express ou Apollo. Trocar MongoDB por outro banco significa criar um novo adaptador e ajustar uma linha no composition root.
+
+### Fluxo da busca full-text
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Usuário
+    participant W as Next.js
+    participant A as API GraphQL
+    participant UC as SearchNotesWithFacetsUseCase
+    participant R as MongoNoteRepository
+    participant M as MongoDB + mongot
+
+    U->>W: digita "mongo" + tag "node"
+    W->>A: query searchNotesWithFacets(input)
+    A->>UC: execute({ query, tags, limit, skip })
+    UC->>R: searchWithFacets(...)
+    par Em paralelo
+        R->>M: $search (compound + fuzzy + boost)
+        and
+        R->>M: $searchMeta (facet tags)
+    end
+    M-->>R: notas + score
+    M-->>R: buckets de tags
+    R-->>UC: { notes, total, facets }
+    UC-->>A: resultado
+    A-->>W: NoteSearchWithFacetsResult
+    W-->>U: lista + sidebar de facetas
+```
+
+**Por que dois pipelines em paralelo:** `$search` e `$searchMeta` não podem coexistir no mesmo pipeline (ambos precisam ser o primeiro estágio). O repositório roda os dois em paralelo com `Promise.all` e junta os resultados.
 
 ### Monorepo
 
@@ -162,7 +298,6 @@ Tagueamento automático por branch (`main`), commit (`sha-<short>`) e `latest`.
 - [x] **Fase 6** — Dockerfiles multi-stage + compose completo
 - [x] **Fase 7** — Kubernetes (kind) com Ingress, HPA e MongoDB Operator
 - [x] **Fase 8** — CI/CD com GitHub Actions + publicação no GHCR
-- [ ] **Fase 9** *(stretch)* — Busca híbrida com `$vectorSearch` + chat RAG
 
 ## 🎓 O que este projeto demonstra
 
