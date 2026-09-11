@@ -276,6 +276,57 @@ Adicione ao `/etc/hosts`:
 
 Acesse `http://api.devnotes.local:8080/graphql` e `http://web.devnotes.local:8080`.
 
+## 🧪 Testes
+
+O projeto usa **Vitest** com cobertura de todas as camadas do backend e testes de componentes no frontend.
+
+### Rodar os testes
+
+```bash
+# Todos os workspaces
+yarn test
+
+# Watch mode (durante desenvolvimento)
+yarn workspace @devnotes/api test:watch
+yarn workspace @devnotes/web test:watch
+```
+
+### Estrutura
+
+```
+apps/api/src/
+├── domain/entities/note.spec.ts                    # Entidade + invariantes
+├── application/use-cases/*.spec.ts                 # 5 use cases
+├── infra/repositories/
+│   ├── in-memory-note-repository.spec.ts           # Contrato
+│   └── mongo-note-repository.spec.ts               # Integração (mongodb-memory-server)
+└── presentation/graphql/mapper/note-mapper.spec.ts # Contrato GraphQL
+
+apps/web/src/components/
+├── note-card.spec.tsx                              # Renderização
+└── note-list.spec.tsx                              # Estado vazio e lista
+```
+
+### Cobertura por camada
+
+| Camada | O que é testado | Tipo |
+|---|---|---|
+| **Domain** | Invariantes da entidade `Note`, normalização de tags, `withId`, `withUpdatedFields` | Unitário |
+| **Application** | Os 5 use cases com `InMemoryNoteRepository` | Unitário |
+| **Infra (in-memory)** | Contrato do `NoteRepository` | Contrato |
+| **Infra (Mongo)** | CRUD contra MongoDB real | Integração |
+| **Presentation (API)** | Mapper do domínio para o contrato GraphQL | Unitário |
+| **Presentation (Web)** | Renderização de `NoteCard` e `NoteList` | Componente |
+
+### Por que o contrato importa
+
+O `note-repository.contract.ts` define o comportamento que **qualquer** implementação de `NoteRepository` deve cumprir. Ele roda contra o `InMemoryNoteRepository` e o `MongoNoteRepository` — garantindo que os dois adaptadores se comportam igual do ponto de vista do domínio. Isso é o **Liskov Substitution Principle** em forma de teste.
+
+### O que não é testado
+
+- **Resolvers GraphQL** — finos, delegam para use cases. Testá-los seria testar o Apollo Server, não o código do projeto. Fica para testes E2E.
+- **`$search`, `$searchMeta` e `$vectorSearch`** — exigem o sidecar `mongot`, que não roda no `mongodb-memory-server`. Cobertos por testes manuais no Sandbox e no ambiente Docker.
+
 ## 📦 Imagens publicadas
 
 As imagens são publicadas automaticamente no GitHub Container Registry a cada push na `main`:
