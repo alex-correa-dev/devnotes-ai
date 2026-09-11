@@ -19,41 +19,52 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  quality:
-    name: Lint & Typecheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    quality:
+      name: Lint & Typecheck
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+        - name: Setup Node
+          uses: actions/setup-node@v4
+          with:
+            node-version: ${{ env.NODE_VERSION }}
 
-      - name: Enable Corepack
-        run: corepack enable
+        - name: Enable Corepack
+          run: corepack enable
 
-      - name: Get Yarn cache dir
-        id: yarn-cache-dir
-        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+        - name: Get Yarn cache dir
+          id: yarn-cache-dir
+          run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
-      - name: Cache Yarn
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.yarn-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+        - name: Cache Yarn
+          uses: actions/cache@v4
+          with:
+            path: ${{ steps.yarn-cache-dir.outputs.dir }}
+            key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-yarn-
 
-      - name: Install dependencies
-        run: yarn install --immutable
+        - name: Cache mongodb-memory-server binaries
+          uses: actions/cache@v4
+          with:
+            path: ~/.cache/mongodb-binaries
+            key: ${{ runner.os }}-mongodb-binaries-${{ hashFiles('yarn.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-mongodb-binaries-
 
-      - name: Typecheck
-        run: yarn typecheck
+        - name: Install dependencies
+          run: yarn install --immutable
 
-      - name: Lint
-        run: yarn lint
+        - name: Typecheck
+          run: yarn typecheck
+
+        - name: Lint
+          run: yarn lint
+
+        - name: Test
+          run: yarn test
 
   build-and-push:
     name: Build & Push images
