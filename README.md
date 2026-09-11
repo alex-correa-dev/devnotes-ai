@@ -1,5 +1,7 @@
 # DevNotes AI
 
+[![CI](https://github.com/alex-correa-dev/devnotes-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/alex-correa-dev/devnotes-ai/actions/workflows/ci.yml)
+
 > Base de conhecimento pessoal com busca full-text nativa do MongoDB — construída como projeto de portfólio para demonstrar stack moderno full-stack.
 
 ## 🎯 Sobre

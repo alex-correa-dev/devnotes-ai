@@ -6,7 +6,7 @@
     "dev": "dotenv -e ../../.env -- next dev --webpack -p 3000",
     "build": "next build",
     "lint": "echo \"[web] lint placeholder\"",
-    "typecheck": "echo \"[web] typecheck placeholder\"",
+    "typecheck": "tsc --noEmit",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {

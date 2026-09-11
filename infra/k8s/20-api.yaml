@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: devnotes-ai-api:latest
+          image: ghcr.io/alex-correa-dev/devnotes-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4000
