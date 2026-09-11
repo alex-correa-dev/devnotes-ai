@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Note } from '../../domain/entities/note.js';
 import type {
   NoteRepository,
@@ -6,6 +7,7 @@ import type {
   SearchWithFacetsParams,
   SearchWithFacetsResult,
 } from '../../domain/repositories/note-repository.js';
+
 export class InMemoryNoteRepository implements NoteRepository {
   private readonly notes = new Map<string, Note>();
 
@@ -17,8 +19,11 @@ export class InMemoryNoteRepository implements NoteRepository {
     return this.notes.get(id) ?? null;
   }
 
-  async save(note: Note): Promise<void> {
-    this.notes.set(note.id, note);
+  async save(note: Note): Promise<string> {
+    const id = note.id ?? randomUUID();
+    const persisted = note.id === null ? note.withId(id) : note;
+    this.notes.set(id, persisted);
+    return id;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -27,14 +32,19 @@ export class InMemoryNoteRepository implements NoteRepository {
 
   async search(params: SearchNotesParams): Promise<SearchNotesResult> {
     const lower = params.query.toLowerCase();
-    const filtered = Array.from(this.notes.values()).filter(
-      (n) =>
-        n.toObject().title.toLowerCase().includes(lower) ||
-        n.toObject().content.toLowerCase().includes(lower),
-    );
+    const filtered = Array.from(this.notes.values()).filter((n) => {
+      const obj = n.toObject();
+      return (
+        obj.title.toLowerCase().includes(lower) ||
+        obj.content.toLowerCase().includes(lower)
+      );
+    });
 
     return {
-      notes: filtered.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? 20)),
+      notes: filtered.slice(
+        params.skip ?? 0,
+        (params.skip ?? 0) + (params.limit ?? 20),
+      ),
       total: filtered.length,
     };
   }
@@ -47,7 +57,9 @@ export class InMemoryNoteRepository implements NoteRepository {
       .slice(0, limit);
   }
 
-  async searchWithFacets(params: SearchWithFacetsParams): Promise<SearchWithFacetsResult> {
+  async searchWithFacets(
+    params: SearchWithFacetsParams,
+  ): Promise<SearchWithFacetsResult> {
     const result = await this.search(params);
     const tagCounts = new Map<string, number>();
 
@@ -60,7 +72,10 @@ export class InMemoryNoteRepository implements NoteRepository {
     return {
       ...result,
       facets: {
-        tags: Array.from(tagCounts.entries()).map(([value, count]) => ({ value, count })),
+        tags: Array.from(tagCounts.entries()).map(([value, count]) => ({
+          value,
+          count,
+        })),
       },
     };
   }

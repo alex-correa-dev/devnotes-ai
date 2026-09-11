@@ -33,6 +33,7 @@ services:
       - API_PORT=4000
       - MONGODB_URI=mongodb://admin:admin@mongodb:27017/devnotes?authSource=admin&directConnection=true
       - MONGODB_DB_NAME=devnotes
+      - CORS_ORIGIN=http://localhost:3000
     depends_on:
       mongodb:
         condition: service_healthy

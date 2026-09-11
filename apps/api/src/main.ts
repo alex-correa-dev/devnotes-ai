@@ -1,3 +1,4 @@
+import cors from 'cors';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
@@ -86,6 +87,10 @@ const start = async (): Promise<void> => {
 
   app.use(
     '/graphql',
+    cors<cors.CorsRequest>({
+      origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+      credentials: true,
+    }),
     express.json(),
     expressMiddleware(server, { context: async () => ({ useCases }) }),
   );

@@ -1,5 +1,5 @@
 export type NoteProps = {
-  id: string;
+  id: string | null;
   title: string;
   content: string;
   tags: string[];
@@ -21,7 +21,7 @@ export class Note {
     const now = new Date();
 
     return new Note({
-      id: crypto.randomUUID(),
+      id: null, // MongoDB vai gerar depois
       title: input.title.trim(),
       content: input.content.trim(),
       tags: Note.normalizeTags(input.tags ?? []),
@@ -32,6 +32,10 @@ export class Note {
 
   static restore(props: NoteProps): Note {
     return new Note(props);
+  }
+
+  withId(id: string): Note {
+    return new Note({ ...this.props, id });
   }
 
   withUpdatedFields(input: {
@@ -55,7 +59,7 @@ export class Note {
     return { ...this.props };
   }
 
-  get id(): string {
+  get id(): string | null {
     return this.props.id;
   }
 

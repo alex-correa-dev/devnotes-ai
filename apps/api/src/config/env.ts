@@ -13,4 +13,5 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   mongoUri: required('MONGODB_URI'),
   mongoDbName: process.env.MONGODB_DB_NAME ?? 'devnotes',
+  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
 } as const;

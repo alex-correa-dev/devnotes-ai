@@ -37,7 +37,7 @@ export type SearchWithFacetsResult = {
 export interface NoteRepository {
   findAll(): Promise<Note[]>;
   findById(id: string): Promise<Note | null>;
-  save(note: Note): Promise<void>;
+  save(note: Note): Promise<string>; 
   delete(id: string): Promise<boolean>;
   search(params: SearchNotesParams): Promise<SearchNotesResult>;
   autocomplete(prefix: string, limit?: number): Promise<string[]>;

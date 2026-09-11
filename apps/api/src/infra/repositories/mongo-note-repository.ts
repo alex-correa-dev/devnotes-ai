@@ -24,8 +24,20 @@ export class MongoNoteRepository implements NoteRepository {
     return doc ? this.toDomain(doc) : null;
   }
 
-  async save(note: Note): Promise<void> {
+  async save(note: Note): Promise<string> {
     const obj = note.toObject();
+
+    if (obj.id === null) {
+      const created = await NoteModel.create({
+        title: obj.title,
+        content: obj.content,
+        tags: obj.tags,
+        createdAt: obj.createdAt,
+        updatedAt: obj.updatedAt,
+      });
+
+      return created._id.toString();
+    }
 
     await NoteModel.findByIdAndUpdate(
       obj.id,
@@ -33,11 +45,12 @@ export class MongoNoteRepository implements NoteRepository {
         title: obj.title,
         content: obj.content,
         tags: obj.tags,
-        createdAt: obj.createdAt,
         updatedAt: obj.updatedAt,
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { new: true },
     );
+    
+    return obj.id;
   }
 
   async delete(id: string): Promise<boolean> {

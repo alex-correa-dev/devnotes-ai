@@ -3,15 +3,30 @@ import { NoteModel } from './models/note-model.js';
 const SEARCH_INDEX_NAME = 'notes_search';
 
 const searchIndexDefinition = {
-  name: SEARCH_INDEX_NAME,
+  name: 'notes_search',
   definition: {
     mappings: {
       dynamic: false,
       fields: {
-        title: { type: 'string', analyzer: 'lucene.standard' },
-        content: { type: 'string', analyzer: 'lucene.standard' },
-        tags: { type: 'token', normalizer: 'lowercase' },
-        createdAt: { type: 'date' },
+        title: {
+          type: 'autocomplete',
+          analyzer: 'lucene.standard',
+          tokenization: 'edgeGram',
+          minGrams: 2,
+          maxGrams: 15,
+          foldDiacritics: true,
+        },
+        content: {
+          type: 'string',
+          analyzer: 'lucene.standard',
+        },
+        tags: {
+          type: 'token',
+          normalizer: 'lowercase',
+        },
+        createdAt: {
+          type: 'date',
+        },
       },
     },
   },
