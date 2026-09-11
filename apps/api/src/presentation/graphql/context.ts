@@ -7,7 +7,7 @@ import type {
   SearchNotesUseCase,
   SearchNotesWithFacetsUseCase,
   AutocompleteNotesUseCase,
-} from '../../../application/use-cases/index.js';
+} from '../../application/use-cases/index.js';
 
 export type GraphQLContext = {
   useCases: {

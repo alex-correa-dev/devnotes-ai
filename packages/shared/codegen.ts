@@ -7,7 +7,6 @@ const config: CodegenConfig = {
       plugins: ['typescript', 'typescript-resolvers'],
       config: {
         useIndexSignature: true,
-        contextType: '../types/context#GraphQLContext',
       },
     },
   },

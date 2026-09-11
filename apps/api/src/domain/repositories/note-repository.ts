@@ -41,4 +41,5 @@ export interface NoteRepository {
   delete(id: string): Promise<boolean>;
   search(params: SearchNotesParams): Promise<SearchNotesResult>;
   autocomplete(prefix: string, limit?: number): Promise<string[]>;
+  searchWithFacets(params: SearchWithFacetsParams): Promise<SearchWithFacetsResult>;
 }

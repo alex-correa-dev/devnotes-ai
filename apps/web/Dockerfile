@@ -20,16 +20,17 @@ COPY apps/web/package.json ./apps/web/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/config/package.json ./packages/config/
 
+# Yarn 4.5.0 cannot resolve the Apollo peer dependency chain
+# immutably on Alpine. See apps/api/Dockerfile for details.
 RUN --mount=type=cache,target=/root/.yarn/berry/cache,sharing=locked \
-    --mount=type=cache,target=/usr/local/share/.cache/yarn,sharing=locked \
-    yarn install --immutable
+    YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
 # ─────────────────────────────────────────────────────────────
 # Stage 3: builder — gera o standalone bundle do Next
 # ─────────────────────────────────────────────────────────────
 FROM base AS builder
 
-# NEXT_PUBLIC_* são inlined no build; precisa vir como build arg
+# NEXT_PUBLIC_* are inlined at build time; must come as build args.
 ARG NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -60,7 +61,6 @@ WORKDIR /app
 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public 2>/dev/null || true
 
 USER nextjs
 

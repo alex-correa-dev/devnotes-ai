@@ -49,6 +49,7 @@ query SearchNotesWithFacets($input: SearchNotesWithFacetsInput!) {
       content
       tags
       createdAt
+      updatedAt
     }
   }
 }

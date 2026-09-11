@@ -3,9 +3,9 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import express from 'express';
 import http from 'node:http';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 import { env } from './config/env.js';
 import { connectToMongo, disconnectFromMongo } from './infra/database/mongoose/connection.js';
@@ -26,11 +26,34 @@ import { ensureSearchIndex } from './infra/database/mongoose/search-index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const findSchemaPath = (): string => {
+  const candidates = [
+    // Dev: apps/api/src/ -> ../../../packages/shared/...
+    resolve(__dirname, '../../../packages/shared/src/graphql/schema.graphql'),
+    // Prod: apps/api/dist/ -> ../../packages/shared/...
+    resolve(__dirname, '../../packages/shared/src/graphql/schema.graphql'),
+    // Fallback: relative to the process working directory (/app in Docker)
+    resolve(process.cwd(), 'packages/shared/src/graphql/schema.graphql'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    `Could not locate schema.graphql. Tried:\n${candidates.join('\n')}`,
+  );
+};
+
 const start = async (): Promise<void> => {
   await connectToMongo(env.mongoUri);
 
-  await ensureSearchIndex();
-
+  ensureSearchIndex().catch((error) => {
+    console.error('Search index initialization failed:', error);
+  });
+  
   // --- Composition root ---
   const noteRepository = new MongoNoteRepository();
   const useCases = {
@@ -44,10 +67,7 @@ const start = async (): Promise<void> => {
     autocompleteNotes: new AutocompleteNotesUseCase(noteRepository),
   };
 
-  const typeDefs = readFileSync(
-    join(__dirname, '../../../packages/shared/src/graphql/schema.graphql'),
-    'utf-8',
-  );
+  const typeDefs = readFileSync(findSchemaPath(), 'utf-8');
 
   const app = express();
   const httpServer = http.createServer(app);
@@ -60,15 +80,15 @@ const start = async (): Promise<void> => {
 
   await server.start();
 
+  app.get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   app.use(
     '/graphql',
     express.json(),
     expressMiddleware(server, { context: async () => ({ useCases }) }),
   );
-
-  app.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
 
   await new Promise<void>((resolve) => httpServer.listen({ port: env.port }, resolve));
 

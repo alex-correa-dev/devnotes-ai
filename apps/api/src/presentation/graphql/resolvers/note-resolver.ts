@@ -1,3 +1,4 @@
+import { GraphQLScalarType, Kind } from 'graphql';
 import { toGraphQLNote } from '../mapper/note-mapper.js';
 import type { GraphQLContext } from '../context.js';
 import type { Resolvers } from '../../../generated/resolvers.js';
@@ -75,9 +76,29 @@ export const noteResolvers: Resolvers<GraphQLContext> = {
     },
   },
 
-  DateTime: {
-    serialize: (value: string | Date) => (value instanceof Date ? value.toISOString() : value),
-    parseValue: (value: string) => new Date(value),
-    parseLiteral: (ast) => (ast.kind === 'StringValue' ? new Date(ast.value) : new Date()),
-  },
+  DateTime: new GraphQLScalarType({
+    name: 'DateTime',
+    description: 'ISO-8601 DateTime string',
+    serialize: (value: unknown): string => {
+      if (value instanceof Date) return value.toISOString();
+
+      if (typeof value === 'string') return value;
+
+      return new Date(String(value)).toISOString();
+    },
+    parseValue: (value: unknown): Date => {
+      if (typeof value !== 'string') {
+        throw new Error('DateTime must be a string');
+      }
+
+      return new Date(value);
+    },
+    parseLiteral: (ast) => {
+      if (ast.kind !== Kind.STRING) {
+        throw new Error('DateTime must be a string');
+      }
+      
+      return new Date(ast.value);
+    },
+  }),
 };

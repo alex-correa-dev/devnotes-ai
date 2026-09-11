@@ -1,8 +1,11 @@
+import type { PipelineStage } from 'mongoose';
 import { Note } from '../../domain/entities/note.js';
 import type {
   NoteRepository,
   SearchNotesParams,
   SearchNotesResult,
+  SearchWithFacetsParams,
+  SearchWithFacetsResult,
 } from '../../domain/repositories/note-repository.js';
 import { NoteModel } from '../database/mongoose/models/note-model.js';
 
@@ -132,7 +135,7 @@ export class MongoNoteRepository implements NoteRepository {
       ? [{ text: { query: tags, path: 'tags' } }]
       : [];
 
-    const searchPipeline = [
+    const searchPipeline: PipelineStage[] = [
       {
         $search: {
           index: SEARCH_INDEX_NAME,
@@ -142,14 +145,14 @@ export class MongoNoteRepository implements NoteRepository {
           },
           count: { type: 'total' },
         },
-      },
+      } as PipelineStage,
       { $addFields: { score: { $meta: 'searchScore' } } },
       { $sort: { score: -1 } },
       { $skip: skip },
       { $limit: limit },
     ];
 
-    const facetPipeline = [
+    const facetPipeline: PipelineStage[] = [
       {
         $searchMeta: {
           index: SEARCH_INDEX_NAME,
@@ -161,15 +164,11 @@ export class MongoNoteRepository implements NoteRepository {
               },
             },
             facets: {
-              tagsFacet: {
-                type: 'string',
-                path: 'tags',
-                numBuckets: 20,
-              },
+              tagsFacet: { type: 'string', path: 'tags', numBuckets: 20 },
             },
           },
         },
-      },
+      } as PipelineStage,
     ];
 
     const [docs, meta] = await Promise.all([

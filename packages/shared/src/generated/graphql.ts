@@ -1,5 +1,4 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { GraphQLContext } from '../types/context';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -245,19 +244,19 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'DateTime';
 }
 
-export type FacetBucketResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FacetBucket'] = ResolversParentTypes['FacetBucket']> = ResolversObject<{
+export type FacetBucketResolvers<ContextType = any, ParentType extends ResolversParentTypes['FacetBucket'] = ResolversParentTypes['FacetBucket']> = ResolversObject<{
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationCreateNoteArgs, 'input'>>;
   deleteNote?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNoteArgs, 'id'>>;
   updateNote?: Resolver<ResolversTypes['Note'], ParentType, ContextType, RequireFields<MutationUpdateNoteArgs, 'id' | 'input'>>;
 }>;
 
-export type NoteResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
+export type NoteResolvers<ContextType = any, ParentType extends ResolversParentTypes['Note'] = ResolversParentTypes['Note']> = ResolversObject<{
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -267,20 +266,20 @@ export type NoteResolvers<ContextType = GraphQLContext, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type NoteSearchResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NoteSearchResult'] = ResolversParentTypes['NoteSearchResult']> = ResolversObject<{
+export type NoteSearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['NoteSearchResult'] = ResolversParentTypes['NoteSearchResult']> = ResolversObject<{
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
   total?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type NoteSearchWithFacetsResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NoteSearchWithFacetsResult'] = ResolversParentTypes['NoteSearchWithFacetsResult']> = ResolversObject<{
+export type NoteSearchWithFacetsResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['NoteSearchWithFacetsResult'] = ResolversParentTypes['NoteSearchWithFacetsResult']> = ResolversObject<{
   facets?: Resolver<ResolversTypes['SearchFacets'], ParentType, ContextType>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
   total?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   autocompleteNotes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QueryAutocompleteNotesArgs, 'prefix'>>;
   note?: Resolver<Maybe<ResolversTypes['Note']>, ParentType, ContextType, RequireFields<QueryNoteArgs, 'id'>>;
   notes?: Resolver<Array<ResolversTypes['Note']>, ParentType, ContextType>;
@@ -288,12 +287,12 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   searchNotesWithFacets?: Resolver<ResolversTypes['NoteSearchWithFacetsResult'], ParentType, ContextType, RequireFields<QuerySearchNotesWithFacetsArgs, 'input'>>;
 }>;
 
-export type SearchFacetsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SearchFacets'] = ResolversParentTypes['SearchFacets']> = ResolversObject<{
+export type SearchFacetsResolvers<ContextType = any, ParentType extends ResolversParentTypes['SearchFacets'] = ResolversParentTypes['SearchFacets']> = ResolversObject<{
   tags?: Resolver<Array<ResolversTypes['FacetBucket']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type Resolvers<ContextType = GraphQLContext> = ResolversObject<{
+export type Resolvers<ContextType = any> = ResolversObject<{
   DateTime?: GraphQLScalarType;
   FacetBucket?: FacetBucketResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;

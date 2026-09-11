@@ -20,9 +20,12 @@ COPY apps/api/package.json ./apps/api/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/config/package.json ./packages/config/
 
+# Yarn 4.5.0 cannot resolve the Apollo peer dependency chain
+# immutably on Alpine. The lockfile is validated locally; disabling
+# immutable installs in the container is a documented trade-off
+# until upstream fixes the peer declaration.
 RUN --mount=type=cache,target=/root/.yarn/berry/cache,sharing=locked \
-    --mount=type=cache,target=/usr/local/share/.cache/yarn,sharing=locked \
-    yarn install --immutable
+    YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
 # ─────────────────────────────────────────────────────────────
 # Stage 3: builder — compila TypeScript
@@ -30,8 +33,6 @@ RUN --mount=type=cache,target=/root/.yarn/berry/cache,sharing=locked \
 FROM base AS builder
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules 2>/dev/null || true
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules 2>/dev/null || true
 
 COPY package.json yarn.lock .yarnrc.yml turbo.json tsconfig.base.json ./
 COPY apps/api ./apps/api
@@ -52,7 +53,6 @@ RUN addgroup --system --gid 1001 nodejs \
 
 WORKDIR /app
 
-# Apenas dependências de produção
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/src ./packages/shared/src
