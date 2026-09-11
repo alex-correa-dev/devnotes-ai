@@ -44,14 +44,14 @@ describe('CreateNoteUseCase', () => {
   });
 
   it('rejects a title shorter than 3 characters', async () => {
-    await expect(
-      useCase.execute({ title: 'ab', content: 'Conteúdo' }),
-    ).rejects.toThrow('Note title must have at least 3 characters');
+    await expect(useCase.execute({ title: 'ab', content: 'Conteúdo' })).rejects.toThrow(
+      'Note title must have at least 3 characters',
+    );
   });
 
   it('rejects empty content', async () => {
-    await expect(
-      useCase.execute({ title: 'Título válido', content: '' }),
-    ).rejects.toThrow('Note content cannot be empty');
+    await expect(useCase.execute({ title: 'Título válido', content: '' })).rejects.toThrow(
+      'Note content cannot be empty',
+    );
   });
 });

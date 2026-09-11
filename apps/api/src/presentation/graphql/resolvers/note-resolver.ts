@@ -12,7 +12,7 @@ export const noteResolvers: Resolvers<GraphQLContext> = {
 
     note: async (_parent, { id }, { useCases }) => {
       const note = await useCases.getNote.execute(id);
-      
+
       return toGraphQLNote(note);
     },
 
@@ -97,7 +97,7 @@ export const noteResolvers: Resolvers<GraphQLContext> = {
       if (ast.kind !== Kind.STRING) {
         throw new Error('DateTime must be a string');
       }
-      
+
       return new Date(ast.value);
     },
   }),

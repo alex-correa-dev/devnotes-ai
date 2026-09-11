@@ -19,6 +19,6 @@ export const disconnectFromMongo = async (): Promise<void> => {
   if (!isConnected) return;
 
   await mongoose.disconnect();
-  
+
   isConnected = false;
 };

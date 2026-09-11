@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
-import {
-  AutocompleteNotesDocument,
-} from '@/lib/graphql/generated/graphql';
+import { AutocompleteNotesDocument } from '@/lib/graphql/generated/graphql';
 
 type SearchBarProps = {
   onSearch: (query: string) => void;

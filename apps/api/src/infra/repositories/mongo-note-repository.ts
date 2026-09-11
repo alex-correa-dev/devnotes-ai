@@ -14,7 +14,7 @@ const SEARCH_INDEX_NAME = 'notes_search';
 export class MongoNoteRepository implements NoteRepository {
   async findAll(): Promise<Note[]> {
     const docs = await NoteModel.find().sort({ createdAt: -1 }).lean();
-    
+
     return docs.map((doc) => this.toDomain(doc));
   }
 
@@ -49,7 +49,7 @@ export class MongoNoteRepository implements NoteRepository {
       },
       { new: true },
     );
-    
+
     return obj.id;
   }
 
@@ -73,9 +73,7 @@ export class MongoNoteRepository implements NoteRepository {
       },
     ];
 
-    const filterClauses = tags?.length
-      ? [{ text: { query: tags, path: 'tags' } }]
-      : [];
+    const filterClauses = tags?.length ? [{ text: { query: tags, path: 'tags' } }] : [];
 
     const pipeline = [
       {
@@ -139,14 +137,12 @@ export class MongoNoteRepository implements NoteRepository {
           query,
           path: ['title', 'content'],
           fuzzy: { maxEdits: 1, prefixLength: 2 },
-          score: { boost: { value: 3 } }
+          score: { boost: { value: 3 } },
         },
       },
     ];
 
-    const filterClauses = tags?.length
-      ? [{ text: { query: tags, path: 'tags' } }]
-      : [];
+    const filterClauses = tags?.length ? [{ text: { query: tags, path: 'tags' } }] : [];
 
     const searchPipeline: PipelineStage[] = [
       {

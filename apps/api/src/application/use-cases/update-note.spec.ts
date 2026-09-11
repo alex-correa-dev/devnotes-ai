@@ -27,11 +27,7 @@ describe('ListNotesUseCase', () => {
     const notes = await listNotes.execute();
 
     expect(notes).toHaveLength(3);
-    expect(notes.map((n) => n.toObject().title).sort()).toEqual([
-      'Nota A',
-      'Nota B',
-      'Nota C',
-    ]);
+    expect(notes.map((n) => n.toObject().title).sort()).toEqual(['Nota A', 'Nota B', 'Nota C']);
   });
 
   it('returns the notes with all their properties intact', async () => {

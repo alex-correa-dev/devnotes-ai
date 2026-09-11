@@ -43,9 +43,7 @@ const findSchemaPath = (): string => {
     }
   }
 
-  throw new Error(
-    `Could not locate schema.graphql. Tried:\n${candidates.join('\n')}`,
-  );
+  throw new Error(`Could not locate schema.graphql. Tried:\n${candidates.join('\n')}`);
 };
 
 const start = async (): Promise<void> => {
@@ -54,7 +52,7 @@ const start = async (): Promise<void> => {
   ensureSearchIndex().catch((error) => {
     console.error('Search index initialization failed:', error);
   });
-  
+
   // --- Composition root ---
   const noteRepository = new MongoNoteRepository();
   const useCases = {

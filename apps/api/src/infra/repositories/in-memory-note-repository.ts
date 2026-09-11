@@ -34,17 +34,11 @@ export class InMemoryNoteRepository implements NoteRepository {
     const lower = params.query.toLowerCase();
     const filtered = Array.from(this.notes.values()).filter((n) => {
       const obj = n.toObject();
-      return (
-        obj.title.toLowerCase().includes(lower) ||
-        obj.content.toLowerCase().includes(lower)
-      );
+      return obj.title.toLowerCase().includes(lower) || obj.content.toLowerCase().includes(lower);
     });
 
     return {
-      notes: filtered.slice(
-        params.skip ?? 0,
-        (params.skip ?? 0) + (params.limit ?? 20),
-      ),
+      notes: filtered.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? 20)),
       total: filtered.length,
     };
   }
@@ -57,9 +51,7 @@ export class InMemoryNoteRepository implements NoteRepository {
       .slice(0, limit);
   }
 
-  async searchWithFacets(
-    params: SearchWithFacetsParams,
-  ): Promise<SearchWithFacetsResult> {
+  async searchWithFacets(params: SearchWithFacetsParams): Promise<SearchWithFacetsResult> {
     const result = await this.search(params);
     const tagCounts = new Map<string, number>();
 

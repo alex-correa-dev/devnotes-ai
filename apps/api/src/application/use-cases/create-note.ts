@@ -12,7 +12,7 @@ export class CreateNoteUseCase {
 
   async execute(input: CreateNoteInput): Promise<Note> {
     const note = Note.create(input);
-    
+
     const id = await this.noteRepository.save(note);
 
     return note.withId(id);

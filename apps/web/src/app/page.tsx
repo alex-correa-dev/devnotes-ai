@@ -49,9 +49,7 @@ export default function HomePage() {
 
   const handleToggleTag = (tag: string) => {
     setSelectedTags((current) =>
-      current.includes(tag)
-        ? current.filter((t) => t !== tag)
-        : [...current, tag],
+      current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag],
     );
     setPage(0);
   };
@@ -60,9 +58,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-4xl p-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold">DevNotes AI</h1>
-        <p className="text-sm text-gray-600">
-          Base de conhecimento com busca full-text
-        </p>
+        <p className="text-sm text-gray-600">Base de conhecimento com busca full-text</p>
       </header>
 
       <SearchBar onSearch={handleSearch} />
@@ -73,11 +69,7 @@ export default function HomePage() {
         </p>
       )}
 
-      {error && (
-        <p className="mt-4 text-sm text-red-600">
-          Erro ao buscar: {error.message}
-        </p>
-      )}
+      {error && <p className="mt-4 text-sm text-red-600">Erro ao buscar: {error.message}</p>}
 
       {hasSearched && result && (
         <div className="mt-8 flex gap-8">
@@ -104,11 +96,7 @@ export default function HomePage() {
             {!loading && result.notes.length > 0 && (
               <>
                 <NoteList notes={result.notes} />
-                <Pagination
-                  currentPage={page}
-                  totalPages={totalPages}
-                  onPageChange={setPage}
-                />
+                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
               </>
             )}
           </section>

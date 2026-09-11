@@ -32,8 +32,7 @@ const searchIndexDefinition = {
   },
 } as const;
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const ensureSearchIndex = async (): Promise<void> => {
   const maxAttempts = 10;
@@ -46,7 +45,7 @@ export const ensureSearchIndex = async (): Promise<void> => {
 
       if (alreadyExists) {
         console.log(`🔍 Search index "${SEARCH_INDEX_NAME}" already exists`);
-        
+
         return;
       }
 

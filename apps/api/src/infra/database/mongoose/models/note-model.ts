@@ -18,5 +18,4 @@ noteSchema.index({ title: 'text', content: 'text', tags: 'text' });
 export type NoteDocument = InferSchemaType<typeof noteSchema>;
 
 // Guard against model re-registration on hot reload.
-export const NoteModel =
-  mongoose.models.Note ?? mongoose.model('Note', noteSchema);
+export const NoteModel = mongoose.models.Note ?? mongoose.model('Note', noteSchema);

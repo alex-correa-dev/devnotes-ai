@@ -3,10 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client/react';
-import {
-  CreateNoteDocument,
-  ListNotesDocument,
-} from '@/lib/graphql/generated/graphql';
+import { CreateNoteDocument, ListNotesDocument } from '@/lib/graphql/generated/graphql';
 
 export default function NewNotePage() {
   const router = useRouter();
@@ -84,9 +81,7 @@ export default function NewNotePage() {
           />
         </div>
 
-        {error && (
-          <p className="text-sm text-red-600">Erro: {error.message}</p>
-        )}
+        {error && <p className="text-sm text-red-600">Erro: {error.message}</p>}
 
         <button
           type="submit"

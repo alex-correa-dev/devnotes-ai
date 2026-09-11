@@ -5,9 +5,7 @@ export const toGraphQLNote = (note: Note): GraphQLNote => {
   const obj = note.toObject();
 
   if (obj.id === null) {
-    throw new Error(
-      'Cannot map a Note without an id to GraphQL. Was the note persisted?',
-    );
+    throw new Error('Cannot map a Note without an id to GraphQL. Was the note persisted?');
   }
 
   return {

@@ -95,24 +95,14 @@ describe('MongoNoteRepository', () => {
     });
 
     it('returns all persisted notes', async () => {
-      await repository.save(
-        Note.create({ title: 'Nota A', content: 'A' }),
-      );
-      await repository.save(
-        Note.create({ title: 'Nota B', content: 'B' }),
-      );
-      await repository.save(
-        Note.create({ title: 'Nota C', content: 'C' }),
-      );
+      await repository.save(Note.create({ title: 'Nota A', content: 'A' }));
+      await repository.save(Note.create({ title: 'Nota B', content: 'B' }));
+      await repository.save(Note.create({ title: 'Nota C', content: 'C' }));
 
       const all = await repository.findAll();
 
       expect(all).toHaveLength(3);
-      expect(all.map((n) => n.toObject().title).sort()).toEqual([
-        'Nota A',
-        'Nota B',
-        'Nota C',
-      ]);
+      expect(all.map((n) => n.toObject().title).sort()).toEqual(['Nota A', 'Nota B', 'Nota C']);
     });
   });
 
@@ -128,9 +118,7 @@ describe('MongoNoteRepository', () => {
     });
 
     it('returns false when the note does not exist', async () => {
-      const result = await repository.delete(
-        '000000000000000000000000',
-      );
+      const result = await repository.delete('000000000000000000000000');
       expect(result).toBe(false);
     });
 

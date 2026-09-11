@@ -17,7 +17,7 @@ export type GraphQLContext = {
     updateNote: UpdateNoteUseCase;
     deleteNote: DeleteNoteUseCase;
     searchNotes: SearchNotesUseCase;
-    searchNotesWithFacets: SearchNotesWithFacetsUseCase,
+    searchNotesWithFacets: SearchNotesWithFacetsUseCase;
     autocompleteNotes: AutocompleteNotesUseCase;
   };
 };

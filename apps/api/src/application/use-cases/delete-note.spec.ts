@@ -38,9 +38,7 @@ describe('DeleteNoteUseCase', () => {
 
     await deleteNote.execute(created.id!);
 
-    await expect(getNote.execute(created.id!)).rejects.toThrow(
-      'Note with id',
-    );
+    await expect(getNote.execute(created.id!)).rejects.toThrow('Note with id');
   });
 
   it('removes the note from the list', async () => {

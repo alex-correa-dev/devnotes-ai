@@ -21,7 +21,7 @@ export class UpdateNoteUseCase {
     const updated = existing.withUpdatedFields(input);
 
     await this.noteRepository.save(updated);
-    
+
     return updated;
   }
 }

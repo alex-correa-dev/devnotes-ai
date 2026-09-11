@@ -10,11 +10,7 @@ export type NoteProps = {
 export class Note {
   private constructor(private readonly props: NoteProps) {}
 
-  static create(input: {
-    title: string;
-    content: string;
-    tags?: string[];
-  }): Note {
+  static create(input: { title: string; content: string; tags?: string[] }): Note {
     Note.assertTitle(input.title);
     Note.assertContent(input.content);
 
@@ -38,11 +34,7 @@ export class Note {
     return new Note({ ...this.props, id });
   }
 
-  withUpdatedFields(input: {
-    title?: string;
-    content?: string;
-    tags?: string[];
-  }): Note {
+  withUpdatedFields(input: { title?: string; content?: string; tags?: string[] }): Note {
     if (input.title !== undefined) Note.assertTitle(input.title);
     if (input.content !== undefined) Note.assertContent(input.content);
 
@@ -76,8 +68,6 @@ export class Note {
   }
 
   private static normalizeTags(tags: string[]): string[] {
-    return Array.from(
-      new Set(tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean)),
-    );
+    return Array.from(new Set(tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean)));
   }
 }
