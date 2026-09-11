@@ -1,4 +1,3 @@
-import type { Note } from '../../domain/entities/note.js';
 import type {
   NoteRepository,
   SearchNotesParams,

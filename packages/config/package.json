@@ -2,5 +2,18 @@
   "name": "@devnotes/config",
   "version": "0.0.0",
   "private": true,
-  "main": "./index.js"
+  "type": "module",
+  "main": "./eslint.config.base.js",
+  "exports": {
+    "./eslint": "./eslint.config.base.js"
+  },
+  "scripts": {
+    "lint": "echo \"[config] no lint needed\"",
+    "typecheck": "echo \"[config] no typecheck needed\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "globals": "^15.0.0",
+    "typescript-eslint": "^8.0.0"
+  }
 }
